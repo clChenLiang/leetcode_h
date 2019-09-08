@@ -28,11 +28,18 @@ type JUST_FUN_KEY<T> = ({
   [K in keyof T]: T[K] extends Function ? K : never
 }[keyof T])
 
+type ConnectedModule<T> = {
+  [K in JUST_FUN_KEY<T>]:
+    T[K] extends (input: Promise<infer NT>) => Promise<Action<infer NU>> ? (input: NT) => Action<NU> :
+    T[K] extends (action: Action<infer NT>) => Action<infer NU> ? (action: NT) => Action<NU> : never
+}
+
 // 修改 Connect 的类型，让 connected 的类型变成预期的类型
 type Connect = (module: EffectModule) => {
   [K in JUST_FUN_KEY<EffectModule>]: EffectModule[K] extends
     (input: Promise<infer T>) => Promise<Action<infer U>>
-      ? <T, U>(input: T) => Action<U> : <T, U>(action: T) => Action<U> 
+      ? (input: T) => Action<U> :
+      EffectModule[K] extends (input: Action<infer T>) => Action<infer U> ? (action: T) => Action<U> : never
 }
 
 // type A = {
