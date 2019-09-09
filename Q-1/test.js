@@ -46,7 +46,7 @@ describe('错误类型转换函数 parseError 测试', function(){
   describe('FireFox Error', function(){
     it('has equal error Stack counts', function(done){
       // 暂未实现更好的模拟报错手段，只能以 object 代替！！
-      let a_chrome_error = {
+      let a_fox_error = {
         message: 'TypeError',
         stack: `
           bar@http://192.168.31.8:8000/c.js:2:9
@@ -56,7 +56,7 @@ describe('错误类型转换函数 parseError 测试', function(){
           http://192.168.31.8:8000/a.js:22:3
           `
       }
-      let res = parseError(a_chrome_error)
+      let res = parseError(a_fox_error)
       if (res.stack.length === 3) {
         done()
       } else {

@@ -17,8 +17,8 @@ export function parseError(err: Error): ErrorMessage {
   // 预处理：分段
   let statckArray:string[] = err.stack.split('\n')
   statckArray.forEach( statck => {
-    let stackInfos:string[] = statck.replace(/\s*at\s*/, '') // 去除 chrome 与 fireFox 的区别
-      .replace(/\:\d\:\d/, str => str.replace(/\:/g, ' ')) // 分离文件
+    let stackInfos:string[] = statck.trim().replace(/at\s*/, '') // 去除 chrome 与 fireFox 的区别
+      .replace(/\:\d*\:\d*/, str => str.replace(/\:/g, ' ')) // 分离文件
       .split(/[@\s]/) // 拆分信息
     // 符合标准。逃逸：“http://192.168.31.8:8000/a.js:22:3”
     if (stackInfos.length === 4) {
