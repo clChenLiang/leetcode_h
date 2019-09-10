@@ -3,17 +3,18 @@
     <!-- 因为单独实现一个 autocomplete，固此处使用 input 代替 el-input -->
     <div>
         <input
+            ref="input"
             v-model="input"
             :placeholder="tips.input"
             @icon-click="clearInput"/>
             <!-- 假设图标宽为 24 px -->
-            <i class="icon-clear" style="margin-left: -24px;"></i>
+            <i v-show="input.length" class="icon-clear" style="margin-left: -24px;"></i>
     <div>
     <!-- 建议框 -->
     <suggestion
+        style="margin-top: 4px;"
         ref="suggestion"
         :keys="input"
-        @getData="getSuggestionData"
         @comfirmOne="comfirm"
         :suggestions="suggestions">
     </suggestion>
@@ -43,7 +44,7 @@ export default {
                 input: '请输入'
             },
             // 下拉框的内容
-            suggestions: []
+            suggestions: [],
         }
     },
     methods: {
@@ -57,13 +58,28 @@ export default {
             this.suggestions = await getData(val)
         },
         comfirm(val) {
+            // 防止选中后，input 变化再导致请求数据
+            if(this.input === val) {
+                this.justConfirm = true
+            }
             this.input = val;
         }
     },
+    mounted() {
+        // 定宽
+        this.$refs.suggestion.parentWidth = this.$refs.input.$el.querySelector('input').clientWidth
+    },
     watch: {
         'input' (val) {
+            // 来源于 Confirm 的变化，不获取数据
+            if (this.justConfirm) {
+                this.justConfirm = false;
+                return
+            }
             if (!val.length) {
-                // 隐藏 suggestion
+                this.suggestions = []
+            } else {
+                this.getSuggestionData(val)
             }
         }
     }
