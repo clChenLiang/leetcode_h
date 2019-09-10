@@ -1,2 +1,41 @@
-BaseCommit:
-  script: 
+version: 2
+
+jobs:
+  test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/auto-commplete
+      - run: yarn lint
+      - run: yarn test
+      - run:
+          name: test-coverage
+          command: cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  
+  pulish:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/auto-commplete
+      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+      - run: |
+          if git log -1 --pretty=%B | grep "^v\?[0-9]\+\.[0-9]\+\.[0-9]\+$";
+          then
+            npm publish
+          else
+            echo "Not a release, skipping publish"
+          fi
+
+workflows:
+  version: 2
+  publish_npm:
+    jobs:
+      - test
+      - publish:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /version/
+            branches:
+              only: master
